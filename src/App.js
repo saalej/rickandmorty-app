@@ -1,24 +1,68 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useEffect, useState } from "react";
+import Navbar from "./components/Navbar";
+import Characters from "./components/Characters";
+import Pagination from "./components/Pagination";
+import SearchCharacters from "./components/SearchCharacters";
 
 function App() {
+  const urlApi = "https://rickandmortyapi.com/api/character";
+  const [characters, setCharacters] = useState([]);
+
+  const [info, setInfo] = useState([]);
+  const [filterText, setFilter] = useState("");
+
+  const handleFilterChange = (text) => {
+    setFilter(text);
+  };
+
+  const filterCharacters = characters.filter((character) =>
+    character.name.toLowerCase().includes(filterText.toLowerCase())
+  );
+
+  const onPrevius = () => {
+    fetchCharacters(info.prev);
+  };
+
+  const onNext = () => {
+    fetchCharacters(info.next);
+  };
+
+  const fetchCharacters = (urlApi) => {
+    fetch(urlApi)
+      .then((response) => response.json())
+      .then((data) => {
+        setCharacters(data.results);
+        setInfo(data.info);
+      })
+      .catch((error) => console.log(error));
+  };
+
+  useEffect(() => {
+    fetchCharacters(urlApi);
+  }, []);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <>
+      <Navbar brand="Rick and Morty App"></Navbar>
+      <div className="container mt-5">
+        <Pagination
+          prev={info.prev}
+          next={info.next}
+          onPrevius={onPrevius}
+          onNext={onNext}
+        ></Pagination>
+        <SearchCharacters
+          onFilterChange={handleFilterChange}
+        ></SearchCharacters>
+        <Characters characters={filterCharacters}></Characters>
+        <Pagination
+          prev={info.prev}
+          next={info.next}
+          onPrevius={onPrevius}
+          onNext={onNext}
+        ></Pagination>
+      </div>
+    </>
   );
 }
 
